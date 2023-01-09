@@ -24,7 +24,38 @@ const CheckoutButton = (props) => {
   return (
     <PayPalScriptProvider>
     <PayPalButtons 
-       
+         onClick={(data, actions) => {
+            const hasAlreadyBoughtCourse = false;
+            if(hasAlreadyBoughtCourse){
+                setError("You Already bough this course");
+                 return actions.reject();
+            }else{
+                return actions.resolve();
+            }
+        }}
+        createOrder = {(data, actions) => {
+            return actions.order.create({
+                purchase_units: [
+                    {
+                        description: product.description,
+                        amount: {
+                            value: product.price,
+                        },
+                    },
+                ],
+            });
+        }}
+        onApprove = { async (data, action) => {
+            const order = await action.order.capture();
+            console.log("order", order);
+
+            handleApprove(data.orderID);
+        }}
+        onCancel={() => {}}
+        onError={(err) => {
+            setError(err);
+            console.log("PayPal Checkout onError", err);
+        }}
     />
 </PayPalScriptProvider>
   )
